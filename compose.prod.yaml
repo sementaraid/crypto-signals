@@ -1,0 +1,22 @@
+# Production: runs behind the shared Caddy reverse proxy (github.com/sementaraid/caddy).
+# No ports are published; Caddy reaches the app on the `web` network as crypto-signals:8000
+# and serves it at https://signals.sunar.dev with HTTPS and a password.
+#
+#   docker compose -f compose.prod.yaml up -d --build
+services:
+  crypto-signals:
+    build: .
+    image: crypto-signals
+    container_name: crypto-signals
+    restart: unless-stopped
+    volumes:
+      - candle-cache:/data # downloaded candles, refreshed after 1 hour
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+
+volumes:
+  candle-cache:
