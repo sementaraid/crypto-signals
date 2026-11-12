@@ -12,8 +12,22 @@ def test_defaults():
     p = parse_params({})
     assert p == Params()
     assert p.timeframes == ("1h", "4h", "1d")
+    assert (p.exchange, p.symbol, p.fee) == ("indodax", "BTC/IDR", 0.003)
+    assert p.to_idr == 1.0 and p.capital == 10_000_000  # rupiah pair: no conversion
+
+
+def test_usd_pair_converts_with_rate():
+    p = parse_params({"exchange": "binance", "symbol": "BTC/USDT"})
     assert p.to_idr == DEFAULTS["usd_idr"]
     assert p.capital == pytest.approx(10_000_000 / 16_500)
+
+
+def test_defaults_from_environment():
+    from signals.params import load_defaults
+
+    d = load_defaults({"DEFAULT_EXCHANGE": " Tokocrypto ", "DEFAULT_SYMBOL": "eth/usdt", "DEFAULT_FEE": "0.001"})
+    assert (d["exchange"], d["symbol"], d["fee"]) == ("tokocrypto", "ETH/USDT", 0.001)
+    assert load_defaults({})["exchange"] == "indodax"
 
 
 def test_parses_strings_and_normalises():
@@ -84,7 +98,7 @@ def test_max_timeframes_constant():
 
 def test_public_is_plain_data():
     pub = parse_params({}).public()
-    assert pub["timeframes"] == ["1h", "4h", "1d"] and pub["to_idr"] == 16_500
+    assert pub["timeframes"] == ["1h", "4h", "1d"] and pub["to_idr"] == 1.0
     assert set(DEFAULTS) <= set(pub)
 
 

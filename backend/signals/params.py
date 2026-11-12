@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -13,20 +14,26 @@ _SYMBOL_RE = re.compile(r"^[A-Z0-9]{1,20}/[A-Z0-9]{1,20}$")
 _EXCHANGE_RE = re.compile(r"^[a-z0-9_]{2,30}$")
 MAX_TIMEFRAMES = 4
 
-DEFAULTS = {
-    "exchange": "binance",
-    "symbol": "BTC/USDT",
-    "timeframe": "4h",
-    "timeframes": "1h,4h,1d",
-    "strategy": "combo",
-    "days": 730,
-    "capital_idr": 10_000_000,
-    "usd_idr": 16_500,
-    "fee": 0.001,
-    "stop_atr": 2.0,
-    "tp_atr": 4.0,
-    "demo": False,
-}
+
+def load_defaults(env: Mapping[str, str] = os.environ) -> dict:
+    """Default parameters. DEFAULT_EXCHANGE / DEFAULT_SYMBOL / DEFAULT_FEE override them per deployment."""
+    return {
+        "exchange": env.get("DEFAULT_EXCHANGE", "indodax").strip().lower(),
+        "symbol": env.get("DEFAULT_SYMBOL", "BTC/IDR").strip().upper(),
+        "timeframe": "4h",
+        "timeframes": "1h,4h,1d",
+        "strategy": "combo",
+        "days": 730,
+        "capital_idr": 10_000_000,
+        "usd_idr": 16_500,
+        "fee": float(env.get("DEFAULT_FEE", "0.003")),
+        "stop_atr": 2.0,
+        "tp_atr": 4.0,
+        "demo": False,
+    }
+
+
+DEFAULTS = load_defaults()
 
 
 class ValidationError(ValueError):

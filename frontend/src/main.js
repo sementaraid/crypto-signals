@@ -5,7 +5,7 @@ import {
 
 const $ = (id) => document.getElementById(id)
 const form = $('form')
-const STORE_KEY = 'crypto-signals-form'
+const STORE_KEY = 'crypto-signals-form-v2' // v2: defaults moved to Indodax / rupiah
 
 const idr = (v) => (v == null ? '—' : 'Rp ' + Math.round(v).toLocaleString('id-ID'))
 const pct = (v) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`)
@@ -250,9 +250,22 @@ function updateDesc() {
 form.addEventListener('submit', (e) => { e.preventDefault(); runBacktest() })
 $('btnCompare').addEventListener('click', runCompare)
 form.strategy.addEventListener('change', updateDesc)
+const market = (id) => (meta.markets || []).find((m) => m.id === id)
+
+function fillSymbols() {
+  const m = market(form.exchange.value)
+  $('symbols').innerHTML = (m ? m.symbols : []).map((s) => `<option value="${esc(s)}"></option>`).join('')
+}
+
+// Switching exchange: use that exchange's quote currency (IDR on Indodax, USDT elsewhere) and its fee.
 form.exchange.addEventListener('change', () => {
-  // Indodax trades in rupiah and charges more
-  if (form.exchange.value === 'indodax' && form.symbol.value.endsWith('/USDT')) form.symbol.value = form.symbol.value.replace('/USDT', '/IDR')
+  const m = market(form.exchange.value)
+  if (!m) return
+  const [base, quote] = form.symbol.value.trim().toUpperCase().split('/')
+  const currencies = new Set((meta.markets || []).map((x) => x.quote))
+  if (base && quote !== m.quote) form.symbol.value = currencies.has(base) ? `BTC/${m.quote}` : `${base}/${m.quote}`
+  form.fee_pct.value = +(m.fee * 100).toFixed(3)
+  fillSymbols()
 })
 
 async function init() {
@@ -263,12 +276,17 @@ async function init() {
     return
   }
   const opts = (list, label = (x) => x) => list.map((x) => `<option value="${esc(x.id ?? x)}">${esc(label(x))}</option>`).join('')
-  form.exchange.innerHTML = opts(meta.exchanges)
+  form.exchange.innerHTML = meta.markets ? opts(meta.markets, (m) => m.name) : opts(meta.exchanges)
   form.timeframe.innerHTML = opts(meta.timeframes)
   form.strategy.innerHTML = opts(meta.strategies, (s) => s.id)
-  form.timeframe.value = '4h'
-  form.strategy.value = 'combo'
+  const d = meta.defaults || {}
+  form.exchange.value = d.exchange || 'indodax'
+  form.symbol.value = d.symbol || 'BTC/IDR'
+  form.timeframe.value = d.timeframe || '4h'
+  form.strategy.value = d.strategy || 'combo'
+  if (d.fee != null) form.fee_pct.value = +(d.fee * 100).toFixed(3)
   restoreForm()
+  fillSymbols()
   updateDesc()
 }
 init()
