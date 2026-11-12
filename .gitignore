@@ -6,3 +6,6 @@ __pycache__/
 *.png
 compare_results.csv
 *.tar.gz
+.pytest_cache/
+.ruff_cache/
+.coverage

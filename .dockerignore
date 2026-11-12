@@ -6,3 +6,7 @@ backend/data
 **/*.png
 **/*.csv
 .git
+backend/tests
+**/.pytest_cache
+**/.ruff_cache
+**/.coverage
