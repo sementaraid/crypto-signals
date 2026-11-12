@@ -13,6 +13,18 @@ docker compose up --build
 ```
 Open http://localhost:8000. Downloaded candles are cached in a Docker volume for 1 hour.
 
+## Deploy to the VPS (behind the shared Caddy)
+Production runs behind the Caddy reverse proxy from
+[sementaraid/caddy](https://github.com/sementaraid/caddy), which serves it at
+`https://signals.sunar.dev` with HTTPS and a password. No ports are published by the app.
+```
+git clone https://github.com/sementaraid/crypto-signals.git ~/apps/crypto-signals
+cd ~/apps/crypto-signals
+docker compose -f compose.prod.yaml up -d --build
+```
+Update later with `git pull && docker compose -f compose.prod.yaml up -d --build`.
+The login is configured in the caddy repo's `.env` (see its `.env.example`).
+
 ## Run without Docker (development)
 Terminal 1 — API:
 ```
