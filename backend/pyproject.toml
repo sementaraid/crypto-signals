@@ -1,0 +1,17 @@
+[project]
+name = "crypto-signals"
+version = "1.1.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["error::FutureWarning", "error::DeprecationWarning:signals.*"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+ignore = ["E741"]  # o/h/l/c are the standard names for candle prices
