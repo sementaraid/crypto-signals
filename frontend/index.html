@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Signals</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23161b22'/><path d='M7 22l6-7 5 4 7-9' stroke='%2326a69a' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="logo"></span>Crypto Signals</div>
+      <div class="demo-flag" id="demoFlag" hidden>DEMO DATA — numbers are meaningless</div>
+    </header>
+
+    <div class="layout">
+      <aside class="panel controls">
+        <form id="form">
+          <h2>Market</h2>
+          <label>Exchange
+            <select name="exchange" id="exchange"></select>
+          </label>
+          <label>Symbol
+            <input name="symbol" value="BTC/USDT" autocomplete="off" />
+          </label>
+          <div class="row">
+            <label>Timeframe
+              <select name="timeframe" id="timeframe"></select>
+            </label>
+            <label>History (days)
+              <input name="days" type="number" min="10" max="3650" value="730" />
+            </label>
+          </div>
+
+          <h2>Strategy</h2>
+          <label>Strategy
+            <select name="strategy" id="strategy"></select>
+          </label>
+          <p class="hint" id="stratDesc"></p>
+          <div class="row">
+            <label>Stop-loss (ATR)
+              <input name="stop_atr" type="number" step="any" min="0" value="2" />
+            </label>
+            <label>Take-profit (ATR)
+              <input name="tp_atr" type="number" step="any" min="0" value="4" />
+            </label>
+          </div>
+
+          <h2>Money</h2>
+          <label>Capital (IDR)
+            <input name="capital_idr" type="number" step="any" min="100000" value="10000000" />
+          </label>
+          <div class="row">
+            <label>Daily goal (IDR)
+              <input name="target_idr" type="number" step="any" min="0" value="100000" />
+            </label>
+            <label>Fee / side (%)
+              <input name="fee_pct" type="number" step="any" min="0" value="0.1" />
+            </label>
+          </div>
+          <label>USD → IDR rate
+            <input name="usd_idr" type="number" step="any" value="16500" />
+          </label>
+          <label class="check"><input type="checkbox" name="demo" /> Use demo (fake) candles</label>
+
+          <div class="buttons">
+            <button type="submit" class="primary" id="btnBacktest">Run backtest</button>
+            <button type="button" id="btnCompare">Compare all</button>
+          </div>
+          <p class="hint">Not financial advice. Backtests show the past, not the future.</p>
+        </form>
+      </aside>
+
+      <main class="main">
+        <div class="error" id="error" hidden></div>
+
+        <section class="signal panel" id="signal">
+          <div class="signal-label">Latest candle says</div>
+          <div class="signal-action" id="sigAction">—</div>
+          <div class="signal-detail" id="sigDetail">Run a backtest to see the current signal.</div>
+        </section>
+
+        <section class="tiles" id="tiles"></section>
+
+        <section class="panel chart-panel">
+          <div class="chart-head">
+            <h3 id="chartTitle">Price</h3>
+            <div class="legend">
+              <span><i style="background:var(--ema21)"></i>EMA21</span>
+              <span><i style="background:var(--ema50)"></i>EMA50</span>
+              <span><i style="background:var(--ema200)"></i>EMA200</span>
+              <span><b class="up">▲</b> buy</span><span><b class="down">▼</b> sell</span>
+            </div>
+          </div>
+          <div id="priceChart" class="chart"></div>
+          <h3 class="sub">Account value (IDR)</h3>
+          <div id="equityChart" class="chart small"></div>
+          <div class="loading" id="loading" hidden><span></span>Crunching candles…</div>
+        </section>
+
+        <section class="panel">
+          <div class="tabs">
+            <button class="tab active" data-tab="trades">Trades</button>
+            <button class="tab" data-tab="compare">Strategy comparison</button>
+          </div>
+          <div class="tab-body" id="tab-trades"><p class="empty">No backtest yet.</p></div>
+          <div class="tab-body" id="tab-compare" hidden><p class="empty">Click <b>Compare all</b> to rank every strategy × timeframe. Click a row to open it.</p></div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

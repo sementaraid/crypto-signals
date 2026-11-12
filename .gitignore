@@ -1,0 +1,8 @@
+node_modules/
+frontend/dist/
+backend/static/
+backend/data/
+__pycache__/
+*.png
+compare_results.csv
+*.tar.gz

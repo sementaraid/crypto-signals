@@ -1,0 +1,11 @@
+services:
+  crypto-signals:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - candle-cache:/data   # downloaded candles are cached here (refreshed after 1 hour)
+    restart: unless-stopped
+
+volumes:
+  candle-cache:
