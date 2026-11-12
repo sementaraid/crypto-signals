@@ -9,6 +9,11 @@ services:
     image: crypto-signals
     container_name: crypto-signals
     restart: unless-stopped
+    environment:
+      # Dashboard / CLI defaults. Indodax trades in rupiah (no USD conversion needed).
+      DEFAULT_EXCHANGE: indodax
+      DEFAULT_SYMBOL: BTC/IDR
+      DEFAULT_FEE: "0.003"
     volumes:
       - candle-cache:/data # downloaded candles, refreshed after 1 hour
     networks:

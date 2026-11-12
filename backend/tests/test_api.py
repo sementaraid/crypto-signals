@@ -23,11 +23,22 @@ def test_health_and_meta(client):
     r, j = get(client, "/api/meta")
     assert [s["id"] for s in j["strategies"]] == list(STRATEGIES)
     assert all(s["description"] for s in j["strategies"])
-    assert "4h" in j["timeframes"] and "binance" in j["exchanges"]
+    assert "4h" in j["timeframes"] and j["exchanges"][0] == "indodax" and "binance" in j["exchanges"]
+    assert j["defaults"]["exchange"] == "indodax" and j["defaults"]["symbol"] == "BTC/IDR"
+    indodax = j["markets"][0]
+    assert indodax["id"] == "indodax" and indodax["quote"] == "IDR" and indodax["fee"] == 0.003
+    assert indodax["symbols"][0] == "BTC/IDR"
+
+
+def test_default_request_is_indodax_rupiah(client, loader_calls):
+    r, j = get(client, "/api/backtest", days=365)
+    p, _ = loader_calls[-1]
+    assert (p.exchange, p.symbol) == ("indodax", "BTC/IDR")
+    assert j["params"]["to_idr"] == 1.0 and j["params"]["fee"] == 0.003
 
 
 def test_backtest_response(client):
-    r, j = get(client, "/api/backtest", strategy="ema_cross", timeframe="4h", days=365)
+    r, j = get(client, "/api/backtest", exchange="binance", symbol="BTC/USDT", strategy="ema_cross", timeframe="4h", days=365)
     assert r.status_code == 200, j
     assert_strict_json(r)
     assert set(j) == {"params", "stats", "candles", "lines", "equity_idr", "trades", "signal"}
@@ -130,3 +141,9 @@ def test_demo_flag_uses_default_loader_offline(static_dir):
     c = create_app({"STATIC_DIR": str(static_dir)}).test_client()  # real default loader
     r, j = get(c, "/api/signal", demo="true", timeframe="1d", days=400)
     assert r.status_code == 200 and j["action"] in {"BUY", "SELL", "HOLD"}
+
+
+def test_relative_static_dir_is_relative_to_cwd(static_dir, monkeypatch):
+    monkeypatch.chdir(static_dir.parent)
+    c = create_app({"STATIC_DIR": "static"}).test_client()
+    assert b"Crypto Signals" in c.get("/").data

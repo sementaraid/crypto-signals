@@ -12,14 +12,14 @@ from werkzeug.exceptions import HTTPException
 from . import __version__
 from .analysis import compare_strategies, latest_signal, prepare, run_backtest
 from .data import DataError, demo_candles, fetch_candles
-from .params import Params, ValidationError, parse_params
+from .markets import EXCHANGES, catalogue
+from .params import DEFAULTS, Params, ValidationError, parse_params
 from .serialize import candle_points, series_points, to_jsonable
 from .strategies import STRATEGIES, describe
 
 log = logging.getLogger(__name__)
 
 TIMEFRAMES = ["15m", "1h", "4h", "1d"]
-EXCHANGES = ["binance", "indodax", "tokocrypto", "bybit", "okx", "kucoin"]
 
 
 def default_loader(p: Params, timeframe: str):
@@ -37,6 +37,8 @@ def create_app(config: dict | None = None) -> Flask:
         JSON_SORT_KEYS=False,
     )
     app.config.update(config or {})
+    # Flask resolves relative paths against the package, not the working directory; pin it down.
+    app.config["STATIC_DIR"] = str(Path(app.config["STATIC_DIR"]).resolve())
 
     def params() -> Params:
         return parse_params(request.args)
@@ -74,7 +76,9 @@ def create_app(config: dict | None = None) -> Flask:
         return {
             "strategies": [{"id": k, "description": describe(k)} for k in STRATEGIES],
             "timeframes": TIMEFRAMES,
-            "exchanges": EXCHANGES,
+            "exchanges": [e.id for e in EXCHANGES],
+            "markets": catalogue(),
+            "defaults": DEFAULTS,
         }
 
     @app.get("/api/backtest")

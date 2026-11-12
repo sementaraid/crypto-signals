@@ -96,7 +96,8 @@ cd backend
 python trader.py compare --capital-idr 50000000
 python trader.py backtest --strategy combo --timeframe 4h --chart
 python trader.py signal --strategy combo --timeframe 4h
-python trader.py compare --exchange indodax --symbol BTC/IDR --fee 0.003
+python trader.py compare --symbol ETH/IDR
+python trader.py compare --exchange tokocrypto --symbol BTC/USDT --fee 0.001
 ```
 
 ## Strategies
@@ -118,5 +119,17 @@ used only to warm up the indicators and are not traded or counted in results.
 - **Recent 30%** — results on only the newest part of history. Good overall but bad
   recently usually means it was luck (marked `luck?`).
 - **Buy & hold** — if simply holding the coin did better, the strategy adds nothing.
+
+## Exchanges and defaults
+The default is **Indodax, BTC/IDR, 0.3% fee per side**: rupiah pairs need no USD conversion.
+Other exchanges (Tokocrypto, Binance, OKX, Bybit, KuCoin, Kraken, Coinbase) are in the dropdown;
+switching sets that exchange's currency and typical fee. Binance and some others block certain
+countries (HTTP 451), so pick one that works from where the server runs.
+
+Change the defaults per deployment with environment variables (see `compose.prod.yaml`):
+`DEFAULT_EXCHANGE`, `DEFAULT_SYMBOL`, `DEFAULT_FEE`.
+
+The symbol box suggests large, long-established coins (`backend/signals/markets.py`). That list
+is a starting point, not a recommendation.
 
 Not financial advice. Paper-trade before using real money.
